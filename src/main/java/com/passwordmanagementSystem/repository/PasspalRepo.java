@@ -7,4 +7,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PasspalRepo extends MongoRepository <PasswordManagerRegister,String>{
    Boolean existsByEmail(String email);
+
+
+    void deleteByEmail(String email);
 }
