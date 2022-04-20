@@ -1,7 +1,9 @@
 package com.passwordmanagementSystem.service;
 
 import com.passwordmanagementSystem.dtos.requests.passwordRequests.Password;
+import com.passwordmanagementSystem.dtos.responses.passwordResponses.FindPassword;
 import com.passwordmanagementSystem.dtos.responses.passwordResponses.PasswordResponse;
+import com.passwordmanagementSystem.exception.PasswordNotFoundException;
 import com.passwordmanagementSystem.model.User;
 import com.passwordmanagementSystem.model.WebsitePassword;
 import com.passwordmanagementSystem.repository.SitePasswordRepo;
@@ -56,6 +58,19 @@ public class SitePasswordServiceImpl implements SitePasswordService{
     @Override
     public Long count() {
         return sitePassword.count();
+    }
+
+    @Override
+    public FindPassword findPasswordByUrl(String url) {
+      Optional<WebsitePassword> password=  sitePassword.findById(url);
+        if (password.isPresent()) {
+            FindPassword foundPassword = new FindPassword();
+            foundPassword.setUsername(password.get().getWebsiteUserName());
+            foundPassword.setPassword(password.get().getWebsitePassword());
+
+            return foundPassword;
+        }
+        throw new PasswordNotFoundException("password not found ");
     }
 
 }

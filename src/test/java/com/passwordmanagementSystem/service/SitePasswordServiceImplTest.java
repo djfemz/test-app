@@ -1,6 +1,7 @@
 package com.passwordmanagementSystem.service;
 
 import com.passwordmanagementSystem.dtos.requests.passwordRequests.Password;
+import com.passwordmanagementSystem.dtos.responses.passwordResponses.FindPassword;
 import com.passwordmanagementSystem.model.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,17 +37,25 @@ UserService userService;
     }
 
     @Test
-    void passwordCanBeAddedToUserRepository(){
+    void passwordCanBeFound(){
         Password request = new Password();
         request.setPassword("Jacinth1_");
         request.setUsername("JayEst");
         request.setUrl("https:facebook.com");
         request.setEmail("agbonirojacinta@gmail.com");
+
         passwordService.createAccount(request);
-        assertThat(passwordService.count(), is(1L));
+
+        FindPassword result = passwordService.findPasswordByUrl("https:facebook.com");
+
+        assertThat(result.getPassword(), is("Jacinth1_"));
+        assertThat(result.getUsername(), is("JayEst"));
 
 //      User user=  userService.findUserByDetails(request.getEmail());
 
+    }
+    @Test
+    void passwordCanBeDeleted(){
 
     }
 
