@@ -1,6 +1,7 @@
 package com.passwordmanagementSystem.model;
 
 import lombok.*;
+import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.data.annotation.Id;
 
 @Setter
@@ -8,12 +9,11 @@ import org.springframework.data.annotation.Id;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class UserPasswords {
-    private String yourPassword;
-    private String name;
-    @Id
+public class WebsitePassword {
+    private String websiteUserName;
+    @Id @UniqueElements
     private String url;
-    private String siteUsername;
-    private String sitePassword;
+    private String websitePassword;
     private String email;
+
 }
