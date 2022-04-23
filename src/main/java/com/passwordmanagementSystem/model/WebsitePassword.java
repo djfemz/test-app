@@ -14,6 +14,6 @@ public class WebsitePassword {
     @Id @UniqueElements
     private String url;
     private String websitePassword;
-    private String email;
+//    private String email;
 
 }

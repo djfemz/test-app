@@ -1,7 +1,9 @@
 package com.passwordmanagementSystem.controller;
 
 
+import com.passwordmanagementSystem.dtos.requests.UpdatePassword;
 import com.passwordmanagementSystem.dtos.requests.passwordRequests.Password;
+import com.passwordmanagementSystem.dtos.requests.userRequests.LoginDetails;
 import com.passwordmanagementSystem.dtos.requests.userRequests.UpdateUserPasswordRequest;
 import com.passwordmanagementSystem.dtos.requests.userRequests.UserRequest;
 import com.passwordmanagementSystem.exception.InvalidDetailsException;
@@ -15,19 +17,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+
+@CrossOrigin(origins = "http://localhost:3000/")
 @RestController
-@RequestMapping
+@RequestMapping("/")
 @Slf4j
 @ControllerAdvice
 public class UserController {
 @Autowired
 UserService service;
-    @Autowired
-    SitePasswordService passwordService;
 
 
 @PostMapping("/createPasswordAccount")
-@ExceptionHandler(value = InvalidDetailsException.class)
+
     public ResponseEntity<?> accountCreationResponse(@Validated @RequestBody UserRequest createAccount){
 //    log.info(createAccount.toString());
     try{
@@ -37,16 +39,19 @@ UserService service;
         return new ResponseEntity<>(new ApiResponse(false, ex.getMessage()), HttpStatus.NOT_ACCEPTABLE);
     }
 }
-    @PostMapping ("/password/password")
-    public ResponseEntity<?> accountCreationResponse( @RequestBody Password request){
+
+@PostMapping("/user/login")
+@ExceptionHandler(value = InvalidDetailsException.class)
+    public ResponseEntity<?> login(@Validated @RequestBody LoginDetails details){
 //    log.info(createAccount.toString());
-        try{
-            return new ResponseEntity<>(passwordService.createAccount(request), HttpStatus.CREATED);
-        }
-        catch(InvalidDetailsException ex){
-            return new ResponseEntity<>(new ApiResponse(false, ex.getMessage()), HttpStatus.NOT_ACCEPTABLE);
-        }
+    try{
+        return new ResponseEntity<>(service.login(details), HttpStatus.FOUND);
     }
+    catch(InvalidDetailsException ex){
+        return new ResponseEntity<>(new ApiResponse(false, ex.getMessage()), HttpStatus.NOT_ACCEPTABLE);
+    }
+}
+
 
 @GetMapping("/{email}")
     public ResponseEntity<?> findUserResponse(@PathVariable  String email){
@@ -58,7 +63,7 @@ UserService service;
     }
 }
 
-@PatchMapping("/updateAccount")
+@PatchMapping()
     public ResponseEntity<?> updateUserAccount(@RequestBody UpdateUserPasswordRequest request){
     try{
         return new ResponseEntity<>(service.updateUserAccount(request), HttpStatus.OK);
@@ -77,4 +82,5 @@ UserService service;
             return new ResponseEntity<>(new ApiResponse(false, ex.getMessage()), HttpStatus.NOT_ACCEPTABLE);
         }
     }
+
 }

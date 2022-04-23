@@ -12,6 +12,7 @@ import com.passwordmanagementSystem.exception.InvalidDetailsException;
 import com.passwordmanagementSystem.model.User;
 import lombok.extern.slf4j.Slf4j;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
 @SpringBootTest
-class PasswordManagerServiceImplTest {
+class UserServiceImplTest {
     @Autowired
     UserService userService;
 
@@ -216,4 +217,8 @@ class PasswordManagerServiceImplTest {
        assertThat(users.size(), is(1));
     }
 
+    @AfterEach
+    void tearDown(){
+        userService.deleteAll();
+    }
 }

@@ -154,5 +154,10 @@ public class UserServiceImpl implements UserService {
         return usersRepo.findAll();
     }
 
+    @Override
+    public void deleteAll() {
+        usersRepo.deleteAll();
+    }
+
 
 }
