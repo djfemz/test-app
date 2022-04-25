@@ -8,7 +8,9 @@ public class Password {
 
     @UniqueElements
     private String username;
-    private String password;
+    private String sitePassword;
     private String url;
     private String email;
+    private String userPassword;
+
 }

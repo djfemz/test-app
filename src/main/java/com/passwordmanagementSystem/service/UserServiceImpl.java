@@ -38,6 +38,7 @@ public class UserServiceImpl implements UserService {
         user.setEmail(request.getEmail());
 //        validateUserEmail(request);
         validateUserPassword(request);
+        user.setLoggedIn(true);
 
         User savedUser = usersRepo.save(user);
 
@@ -82,6 +83,8 @@ public class UserServiceImpl implements UserService {
     public FindUserResponse findUserByDetails(String email) {
        Optional<User> user = usersRepo.findById(email);
        if(user.isPresent()){
+           user.get().setLoggedIn(true);
+
            FindUserResponse response = new FindUserResponse();
            response.setEmail(user.get().getEmail());
            response.setPassword(user.get().getUserPassword());
@@ -96,6 +99,8 @@ public class UserServiceImpl implements UserService {
         boolean isValid = userFound.isPresent() && userFound.get().
                 getUserPassword().equals(request.getOldPassword());
         if(isValid){
+            userFound.get().setLoggedIn(true);
+
             userFound.get().setEmail(request.getEmail());
 //            userFound.get().setUserPassword(request.getNewPassword());
             validateUpdatedPassword(request, userFound);
@@ -126,7 +131,9 @@ public class UserServiceImpl implements UserService {
         boolean isValid = userFound.isPresent() && userFound.get().
                 getUserPassword().equals(request.getPassword());
 
-        if(isValid){
+        if(isValid ){
+            userFound.get().setLoggedIn(true);
+
             LoginResponse response = new LoginResponse();
             response.setMessage("Welcome " + userFound.get().getEmail());
             return response;
@@ -141,6 +148,8 @@ public class UserServiceImpl implements UserService {
                 getUserPassword().equals(request.getPassword());
 
         if(isValid){
+            userFound.get().setLoggedIn(true);
+
             usersRepo.delete(userFound.get());
             DeleteResponse response = new DeleteResponse();
             response.setResponse("deleted successfully");

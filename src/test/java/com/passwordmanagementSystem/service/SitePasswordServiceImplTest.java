@@ -8,16 +8,13 @@ import com.passwordmanagementSystem.dtos.responses.passwordResponses.FindPasswor
 import com.passwordmanagementSystem.dtos.responses.passwordResponses.UpdatePasswordResponse;
 import com.passwordmanagementSystem.dtos.responses.userResponses.DeleteResponse;
 import com.passwordmanagementSystem.dtos.responses.userResponses.LoginResponse;
-import com.passwordmanagementSystem.model.User;
 import com.passwordmanagementSystem.model.WebsitePassword;
-import com.passwordmanagementSystem.repository.UserRepo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
@@ -45,12 +42,13 @@ SitePasswordService passwordService;
         request1.setPassword("JayEst1-");
 
         Password request = new Password();
-        request.setPassword("Jacinth1_");
+        request.setSitePassword("Jacinth1_");
         request.setUsername("JayEst");
         request.setUrl("https:facebook.com");
         request.setEmail("agbonirojacinta@gmail.com");
+        request.setUserPassword("JayEst1-");
 
-        passwordService.createAccount(request, request1);
+        passwordService.createAccount(request);
 
         LoginResponse result1 = service.login(request1);
         assertThat(result1.getMessage(), is("Welcome agbonirojacinta@gmail.com"));
@@ -68,16 +66,18 @@ SitePasswordService passwordService;
         service.createAccount(newAccount);
 
         Password request = new Password();
-        request.setPassword("Jacinth1_");
+        request.setSitePassword("Jacinth1_");
         request.setUsername("JayEst");
         request.setUrl("https:facebook.com");
         request.setEmail("agbonirojacinta@gmail.com");
+        request.setUserPassword("JayEst1-");
+
 
 
         LoginDetails request1 = new LoginDetails();
         request1.setEmail("agbonirojacinta@gmail.com");
         request1.setPassword("JayEst1-");
-        passwordService.createAccount(request,request1);
+        passwordService.createAccount(request);
 
         FindPassword result = passwordService.findPasswordByUrl("https:facebook.com",
                  request1);
@@ -101,30 +101,26 @@ SitePasswordService passwordService;
         Password request = new Password();
         Password request1 = new Password();
 
-        request.setPassword("Jacinth1_");
+        request.setSitePassword("Jacinth1_");
         request.setUsername("JayEst");
         request.setUrl("https:facebook.com");
         request.setEmail("agbonirojacinta@gmail.com");
 
 
-        request1.setPassword("Jacinth1_");
+
+        request1.setSitePassword("Jacinth1_");
         request1.setUsername("JayJay");
         request1.setUrl("https:instagram.com");
         request1.setEmail("agbonirojacinta@gmail.com");
+        request1.setUserPassword("JayEst1-");
 
 
-        LoginDetails loginDetails = new LoginDetails();
-        loginDetails.setEmail("agbonirojacinta@gmail.com");
-        loginDetails.setPassword("JayEst1-");
-//        passwordService.createAccount(request,loginDetails);
-
-
-        passwordService.createAccount(request,loginDetails);
-        passwordService.createAccount(request1,loginDetails);
+        passwordService.createAccount(request);
+        passwordService.createAccount(request1);
 
 
         DeleteResponse result = passwordService.deletePassword("https:instagram.com"
-        ,loginDetails);
+        ,"agbonirojacinta@gmail.com");
 
         assertThat(result.getResponse(), is("deleted successfully"));
         assertThat(passwordService.count(), is(1L));
@@ -142,16 +138,13 @@ SitePasswordService passwordService;
 
         Password request = new Password();
 
-        request.setPassword("Jacinth1_");
+        request.setSitePassword("Jacinth1_");
         request.setUsername("JayEst");
         request.setUrl("https:facebook.com");
         request.setEmail("agbonirojacinta@gmail.com");
+        request.setUserPassword("JayEst1-");
 
-        LoginDetails loginDetails = new LoginDetails();
-        loginDetails.setEmail("agbonirojacinta@gmail.com");
-        loginDetails.setPassword("JayEst1-");
-
-        passwordService.createAccount(request,loginDetails);
+        passwordService.createAccount(request);
 
         UpdatePassword updatedPassword = new UpdatePassword();
         updatedPassword.setOldPassword("Jacinth1_");
@@ -159,7 +152,7 @@ SitePasswordService passwordService;
         updatedPassword.setUrl("https:facebook.com");
 
         UpdatePasswordResponse result = passwordService.updatePassword(updatedPassword,
-                loginDetails);
+                "agbonirojacinta@gmail.com");
 
         assertThat(result.getNewPassword(), is("Jacinth2$"));
         assertThat(result.getUrl(), is("https:facebook.com"));
@@ -177,17 +170,17 @@ SitePasswordService passwordService;
 
         Password request = new Password();
 
-        request.setPassword("Jacinth1_");
+        request.setSitePassword("Jacinth1_");
         request.setUsername("JayEst");
         request.setUrl("https:facebook.com");
         request.setEmail("agbonirojacinta@gmail.com");
-
+        request.setUserPassword("JayEst1-");
 
         LoginDetails loginDetails = new LoginDetails();
         loginDetails.setEmail("agbonirojacinta@gmail.com");
         loginDetails.setPassword("JayEst1-");
 
-        passwordService.createAccount(request,loginDetails);
+        passwordService.createAccount(request);
 
         List<WebsitePassword> passwords = passwordService.findAll();
         assertThat(passwords.size(), is(1));

@@ -8,12 +8,12 @@ import com.passwordmanagementSystem.dtos.responses.passwordResponses.PasswordRes
 import com.passwordmanagementSystem.dtos.responses.passwordResponses.UpdatePasswordResponse;
 import com.passwordmanagementSystem.dtos.responses.userResponses.DeleteResponse;
 import com.passwordmanagementSystem.exception.InvalidPasswordException;
-import com.passwordmanagementSystem.exception.InvalidUserException;
 import com.passwordmanagementSystem.exception.PasswordNotFoundException;
 import com.passwordmanagementSystem.model.User;
 import com.passwordmanagementSystem.model.WebsitePassword;
 import com.passwordmanagementSystem.repository.SitePasswordRepo;
 import com.passwordmanagementSystem.repository.UserRepo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class SitePasswordServiceImpl implements SitePasswordService{
 
     @Autowired
@@ -29,37 +30,29 @@ public class SitePasswordServiceImpl implements SitePasswordService{
     @Autowired
     private SitePasswordRepo sitePassword;
 
-    @Autowired
-    private UserServiceImpl userService;
-
     @Override
-    public PasswordResponse createAccount(Password request, LoginDetails details) {
-        WebsitePassword password = new WebsitePassword();
-        password.setUrl(request.getUrl());
-        password.setWebsiteUserName(request.getUsername());
-        password.setWebsitePassword(request.getPassword());
+    public PasswordResponse createAccount(Password request) {
+        WebsitePassword password1 = new WebsitePassword();
+        password1.setUrl(request.getUrl());
+        password1.setWebsiteUserName(request.getUsername());
+        password1.setWebsitePassword(request.getSitePassword());
 
         Optional<User> user = userRepo.findById(request.getEmail());
-
-        boolean userIsValid=user.isPresent() && Objects.equals(details.getPassword(), user.get().getUserPassword());
+        boolean userIsValid=user.isPresent() && Objects.equals(request.getUserPassword(),
+                user.get().getUserPassword());
         if(userIsValid) {
-            user.get().getPasswords().add(password);
+            user.get().setLoggedIn(true);
+            user.get().getPasswords().add(password1);
             userRepo.save(user.get());
         }
 
-         WebsitePassword savedPassword= sitePassword.save(password);
+         WebsitePassword savedPassword= sitePassword.save(password1);
 
          PasswordResponse response = new PasswordResponse();
          response.setPassword(savedPassword.getWebsitePassword());
          response.setUsername(savedPassword.getWebsiteUserName());
          response.setUrl(savedPassword.getUrl());
 
-//         User user = userService.findUserByDetails(request.getEmail());
-//        SitePassword mapped = Mapper.map(request);
-//        var saved = sitePassword.save(mapped);
-//        User user = userService.findUser(request.getUserName());
-//        user.getPassword.add(saved);
-//        userService.save(user);
 
         return response;
     }
@@ -71,55 +64,80 @@ public class SitePasswordServiceImpl implements SitePasswordService{
 
     @Override
     public FindPassword findPasswordByUrl(String url, LoginDetails details) {
-      Optional<WebsitePassword> password=  sitePassword.findById(url);
+//        log.info(url+ details.toString());
+//      Optional<WebsitePassword> password=  sitePassword.findByUrl(url);
         Optional<User> user = userRepo.findById(details.getEmail());
-            boolean userIsValid = user.isPresent() && Objects.equals(user.get().getUserPassword(), details.getPassword());
-        if (password.isPresent()&& userIsValid) {
-
-                user.get().getPasswords().add(password.get());
-                userRepo.save(user.get());
-
-
-            FindPassword foundPassword = new FindPassword();
-            foundPassword.setUsername(password.get().getWebsiteUserName());
-            foundPassword.setPassword(password.get().getWebsitePassword());
-
-            return foundPassword;
-        }
+            boolean userIsValid = user.isPresent() && Objects.equals(user.get().getUserPassword(),
+                    details.getPassword());
+            if(userIsValid) {
+                user.get().setLoggedIn(true);
+                List<WebsitePassword> passwordToBeFound = user.get().getPasswords();
+                for (WebsitePassword passwords : passwordToBeFound) {
+                    if (Objects.equals(passwords.getUrl(), url)) {
+                        FindPassword foundPassword = new FindPassword();
+                        foundPassword.setUsername(passwords.getWebsiteUserName());
+                        foundPassword.setPassword(passwords.getWebsitePassword());
+                        return foundPassword;
+                    }
+                }
+            }
         throw new PasswordNotFoundException("password not found ");
     }
 
     @Override
-    public DeleteResponse deletePassword(String url,LoginDetails details) {
-        Optional<User> user = userRepo.findById(details.getEmail());
+    public DeleteResponse deletePassword(String url,String email) {
+        Optional<User> user = userRepo.findById(email);
+        Optional<WebsitePassword> password = sitePassword.findByUrl(url);
+        if (user.isPresent()&&  password.isPresent()){
+            user.get().setLoggedIn(true);
+            List<WebsitePassword> passwordToBeFound = user.get().getPasswords();
+            for (WebsitePassword passwords : passwordToBeFound) {
+                if (Objects.equals(passwords.getUrl(), url)) {
+                    user.get().getPasswords().remove(passwords);
+                    sitePassword.deleteByUrl(url);
 
-        if (user.isPresent()&& sitePassword.existsById(url)){
-           sitePassword.deleteById(url);
+                    DeleteResponse response = new DeleteResponse();
+                    response.setResponse("deleted successfully");
+                    return response;
 
-            DeleteResponse response = new DeleteResponse();
-            response.setResponse("deleted successfully");
-            return response;
+                }
+            }
+
+
         }
         throw new InvalidPasswordException(url + " not found");
 
     }
 
     @Override
-    public UpdatePasswordResponse updatePassword(UpdatePassword updatePassword, LoginDetails details) {
-        Optional<WebsitePassword> passwordFound = sitePassword.findById(updatePassword.getUrl());
-        if(passwordFound.isPresent()) {
-            passwordFound.get().setWebsitePassword(updatePassword.getNewPassword());
+    public UpdatePasswordResponse updatePassword(UpdatePassword updatePassword, String email) {
+        Optional<User> user = userRepo.findById(email);
 
-            passwordFound.get().setUrl(updatePassword.getUrl());
+        Optional<WebsitePassword> passwordFound = sitePassword.findByUrl(updatePassword.getUrl());
+        if(passwordFound.isPresent()&& user.isPresent()) {
+            user.get().setLoggedIn(true);
+            List<WebsitePassword> passwordToBeFound = user.get().getPasswords();
+            for (WebsitePassword passwords : passwordToBeFound) {
+                if (Objects.equals(passwords.getUrl(), updatePassword.getUrl())) {
+                    user.get().getPasswords().remove(passwords);
+                    passwordFound.get().setWebsitePassword(updatePassword.getNewPassword());
 
-            sitePassword.save(passwordFound.get());
+                    passwordFound.get().setUrl(updatePassword.getUrl());
+                    sitePassword.save(passwordFound.get());
 
-            UpdatePasswordResponse response = new UpdatePasswordResponse();
+                    user.get().getPasswords().add(passwordFound.get());
+//                    userRepo.save(user.get());
 
-            response.setNewPassword(passwordFound.get().getWebsitePassword());
-            response.setUrl(passwordFound.get().getUrl());
 
-            return response;
+                    UpdatePasswordResponse response = new UpdatePasswordResponse();
+
+                    response.setNewPassword(passwordFound.get().getWebsitePassword());
+                    response.setUrl(passwordFound.get().getUrl());
+
+                    return response;
+                }}
+
+
         }
         throw new InvalidPasswordException (updatePassword.getUrl() + " not found");
 

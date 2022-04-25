@@ -10,10 +10,11 @@ import org.springframework.data.annotation.Id;
 @AllArgsConstructor
 @Data
 public class WebsitePassword {
-    private String websiteUserName;
     @Id @UniqueElements
+    private String websiteUserName;
+
     private String url;
     private String websitePassword;
-//    private String email;
+
 
 }

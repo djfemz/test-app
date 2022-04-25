@@ -12,15 +12,15 @@ import com.passwordmanagementSystem.model.WebsitePassword;
 import java.util.List;
 
 public interface SitePasswordService {
-    PasswordResponse createAccount(Password request, LoginDetails details);
+    PasswordResponse createAccount(Password request);
 
     Long count();
 
     FindPassword findPasswordByUrl(String url, LoginDetails details);
 
-    DeleteResponse deletePassword(String url,LoginDetails details);
+    DeleteResponse deletePassword(String url,String email);
 
-    UpdatePasswordResponse updatePassword(UpdatePassword updatePassword, LoginDetails details);
+    UpdatePasswordResponse updatePassword(UpdatePassword updatePassword, String email);
 
     List<WebsitePassword> findAll();
 

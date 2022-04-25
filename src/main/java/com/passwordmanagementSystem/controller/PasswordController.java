@@ -18,17 +18,17 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "http://localhost:3000/")
 
 @RestController
-@RequestMapping("/login/addPassword")
+@RequestMapping("/api")
 public class PasswordController {
     @Autowired
     SitePasswordService passwordService;
 
 
-    @PostMapping ("/login/password")
-    public ResponseEntity<?> accountCreationResponse( @RequestBody Password request,LoginDetails details){
+    @PostMapping ("/login")
+    public ResponseEntity<?> accountCreationResponse( @RequestBody Password request){
 //    log.info(createAccount.toString());
         try{
-            return new ResponseEntity<>(passwordService.createAccount(request, details), HttpStatus.CREATED);
+            return new ResponseEntity<>(passwordService.createAccount(request), HttpStatus.CREATED);
         }
         catch(InvalidDetailsException ex){
             return new ResponseEntity<>(new ApiResponse(false, ex.getMessage()), HttpStatus.NOT_ACCEPTABLE);
@@ -36,8 +36,8 @@ public class PasswordController {
     }
 
 
-    @GetMapping("/password/{url}/{LoginDetails}")
-    public ResponseEntity<?> findUserPasswordByUrl(@PathVariable  String url, LoginDetails details){
+    @GetMapping("/{url}")
+    public ResponseEntity<?> findUserPasswordByUrl(@PathVariable  String url, @RequestBody LoginDetails details){
         try{
             return new ResponseEntity<>(passwordService.findPasswordByUrl(url,details), HttpStatus.FOUND);
         }
@@ -47,19 +47,19 @@ public class PasswordController {
     }
 
 
-    @DeleteMapping("/password/{url}/{LoginDetails}")
-    public ResponseEntity<?> DeletePassword(@PathVariable  String url, LoginDetails details){
+    @DeleteMapping("/{url}/{email}")
+    public ResponseEntity<?> DeletePassword(@PathVariable  String url,@PathVariable String email){
         try{
-            return new ResponseEntity<>(passwordService.deletePassword(url, details), HttpStatus.OK);
+            return new ResponseEntity<>(passwordService.deletePassword(url, email), HttpStatus.OK);
         }
         catch(InvalidDetailsException ex){
             return new ResponseEntity<>(new ApiResponse(false, ex.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
-    @PatchMapping("/updatePassword")
-    public ResponseEntity<?> updatePassword(@RequestBody UpdatePassword request,LoginDetails details){
+    @PatchMapping("/{email}")
+    public ResponseEntity<?> updatePassword(@RequestBody UpdatePassword request, @PathVariable String email){
         try{
-            return new ResponseEntity<>(passwordService.updatePassword(request, details), HttpStatus.OK);
+            return new ResponseEntity<>(passwordService.updatePassword(request, email), HttpStatus.OK);
         }
         catch(InvalidDetailsException ex){
             return new ResponseEntity<>(new ApiResponse(false, ex.getMessage()), HttpStatus.NOT_ACCEPTABLE);

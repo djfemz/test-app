@@ -15,5 +15,6 @@ public class User {
     private String email;
     private String userPassword;
     List<WebsitePassword> passwords = new ArrayList<>();
+    private boolean isLoggedIn;
 
 }
