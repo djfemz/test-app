@@ -8,6 +8,7 @@ import com.passwordmanagementSystem.dtos.responses.passwordResponses.PasswordRes
 import com.passwordmanagementSystem.dtos.responses.passwordResponses.UpdatePasswordResponse;
 import com.passwordmanagementSystem.dtos.responses.userResponses.DeleteResponse;
 import com.passwordmanagementSystem.exception.InvalidPasswordException;
+import com.passwordmanagementSystem.exception.PasswordExistException;
 import com.passwordmanagementSystem.exception.PasswordNotFoundException;
 import com.passwordmanagementSystem.model.User;
 import com.passwordmanagementSystem.model.WebsitePassword;
@@ -40,13 +41,16 @@ public class SitePasswordServiceImpl implements SitePasswordService{
         Optional<User> user = userRepo.findById(request.getEmail());
         boolean userIsValid=user.isPresent() && Objects.equals(request.getUserPassword(),
                 user.get().getUserPassword());
-        if(userIsValid) {
+//        if (user.isPresent()&& sitePassword.findByUrl(request.getUrl()).isPresent()){
+//            sitePassword.deleteByUrl(request.getUrl());
+//        }
+        if(userIsValid ) {
             user.get().setLoggedIn(true);
-            user.get().getPasswords().add(password1);
-            userRepo.save(user.get());
         }
 
          WebsitePassword savedPassword= sitePassword.save(password1);
+        user.get().getPasswords().add(savedPassword);
+        userRepo.save(user.get());
 
          PasswordResponse response = new PasswordResponse();
          response.setPassword(savedPassword.getWebsitePassword());
@@ -64,8 +68,6 @@ public class SitePasswordServiceImpl implements SitePasswordService{
 
     @Override
     public FindPassword findPasswordByUrl(String url, LoginDetails details) {
-//        log.info(url+ details.toString());
-//      Optional<WebsitePassword> password=  sitePassword.findByUrl(url);
         Optional<User> user = userRepo.findById(details.getEmail());
             boolean userIsValid = user.isPresent() && Objects.equals(user.get().getUserPassword(),
                     details.getPassword());
@@ -91,11 +93,13 @@ public class SitePasswordServiceImpl implements SitePasswordService{
         if (user.isPresent()&&  password.isPresent()){
             user.get().setLoggedIn(true);
             List<WebsitePassword> passwordToBeFound = user.get().getPasswords();
+            log.info(String.valueOf(passwordToBeFound));
             for (WebsitePassword passwords : passwordToBeFound) {
                 if (Objects.equals(passwords.getUrl(), url)) {
-                    user.get().getPasswords().remove(passwords);
-                    sitePassword.deleteByUrl(url);
 
+                    sitePassword.deleteByUrl(url);
+                    user.get().getPasswords().remove(passwords);
+                        userRepo.save(user.get());
                     DeleteResponse response = new DeleteResponse();
                     response.setResponse("deleted successfully");
                     return response;
@@ -115,6 +119,8 @@ public class SitePasswordServiceImpl implements SitePasswordService{
 
         Optional<WebsitePassword> passwordFound = sitePassword.findByUrl(updatePassword.getUrl());
         if(passwordFound.isPresent()&& user.isPresent()) {
+                     sitePassword.deleteByUrl(passwordFound.get().getUrl());
+
             user.get().setLoggedIn(true);
             List<WebsitePassword> passwordToBeFound = user.get().getPasswords();
             for (WebsitePassword passwords : passwordToBeFound) {
@@ -126,7 +132,7 @@ public class SitePasswordServiceImpl implements SitePasswordService{
                     sitePassword.save(passwordFound.get());
 
                     user.get().getPasswords().add(passwordFound.get());
-//                    userRepo.save(user.get());
+                    userRepo.save(user.get());
 
 
                     UpdatePasswordResponse response = new UpdatePasswordResponse();

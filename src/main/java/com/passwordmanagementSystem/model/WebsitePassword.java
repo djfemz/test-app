@@ -10,7 +10,7 @@ import org.springframework.data.annotation.Id;
 @AllArgsConstructor
 @Data
 public class WebsitePassword {
-    @Id @UniqueElements
+     @UniqueElements
     private String websiteUserName;
 
     private String url;
