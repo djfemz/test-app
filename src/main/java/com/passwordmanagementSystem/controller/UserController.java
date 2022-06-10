@@ -18,7 +18,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
-@CrossOrigin(origins = "http://localhost:3000/")
 @RestController
 @RequestMapping("/")
 @Slf4j
@@ -32,6 +31,7 @@ UserService service;
 
     public ResponseEntity<?> accountCreationResponse(@Validated @RequestBody UserRequest createAccount){
 //    log.info(createAccount.toString());
+    log.info("here---->{}", createAccount.getEmail());
     try{
         return new ResponseEntity<>(service.createAccount(createAccount), HttpStatus.CREATED);
     }

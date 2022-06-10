@@ -15,7 +15,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
-@CrossOrigin(origins = "http://localhost:3000/")
 
 @RestController
 @RequestMapping("/api")
@@ -26,7 +25,6 @@ public class PasswordController {
 
     @PostMapping ("/login")
     public ResponseEntity<?> accountCreationResponse( @RequestBody Password request){
-//    log.info(createAccount.toString());
         try{
             return new ResponseEntity<>(passwordService.createAccount(request), HttpStatus.CREATED);
         }

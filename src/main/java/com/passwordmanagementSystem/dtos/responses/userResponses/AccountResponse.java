@@ -4,8 +4,6 @@ import lombok.Data;
 
 @Data
 public class AccountResponse {
-
     private String email;
     private String password;
-
 }
